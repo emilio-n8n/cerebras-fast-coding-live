@@ -1,0 +1,8 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api/v1",
+    "ANTHROPIC_MODEL": "cerebras/llama-3.3-70b",
+    "ANTHROPIC_API_KEY": "${OPENROUTER_API_KEY}"
+  },
+  "autoUpdatesChannel": "latest"
+}
