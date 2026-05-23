@@ -17,5 +17,9 @@ Règles :
 - Maximum 200 tokens"""
 
 async def get_claude_command(user_input: str) -> str:
-    response = model.generate_content(f"{SYSTEM_PROMPT}\n\nDemande utilisateur : {user_input}")
+    import asyncio
+    response = await asyncio.to_thread(
+        model.generate_content,
+        f"{SYSTEM_PROMPT}\n\nDemande utilisateur : {user_input}",
+    )
     return response.text.strip()
