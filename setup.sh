@@ -28,9 +28,14 @@ trap cleanup SIGINT SIGTERM
 sleep 2
 
 echo ""
-echo "  Backend  → http://localhost:8000"
+echo "  Backend  → http://localhost:8000  (proxy WebSocket via frontend)"
 echo "  Frontend → http://localhost:3000"
 echo "  Target   → http://localhost:3001"
 echo ""
 echo "Appuie sur Ctrl+C pour tout arrêter."
+
+# Ouvre les ports Cloud Shell si disponible
+if command -v cloudshell &>/dev/null; then
+  cloudshell preview --port 3000 &>/dev/null &
+fi
 wait
