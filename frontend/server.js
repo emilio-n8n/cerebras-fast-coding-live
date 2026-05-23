@@ -18,10 +18,15 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   });
 
+  proxy.on("error", (err, req, socket) => {
+    console.error("Proxy error:", err.message);
+    if (socket && socket.end) socket.end();
+  });
+
   server.on("upgrade", (req, socket, head) => {
     const { pathname } = parse(req.url);
     if (pathname === "/ws") {
-      proxy.ws(req, socket, head);
+      proxy.ws(req, socket, head, {});
     } else {
       socket.destroy();
     }
