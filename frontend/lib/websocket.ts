@@ -12,7 +12,31 @@ export type WSMessage =
 
 type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
-export function useWebSocket(url: string = "ws://localhost:8000/ws") {
+function resolveWsUrl(): string {
+  if (typeof window === "undefined") return "ws://localhost:8000/ws";
+
+  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+  if (envUrl) return envUrl;
+
+  const { hostname, protocol } = window.location;
+  const isHttps = protocol === "https:";
+
+  // Cloud Shell / Google Cloud Workstations: PORT-HASH.cloudshell.dev
+  if (hostname.includes("cloudshell.dev") || hostname.includes("googleusercontent.com")) {
+    const rest = hostname.replace(/^\d+-/, "");
+    return `${isHttps ? "wss" : "ws"}://8000-${rest}/ws`;
+  }
+
+  // Gitpod / Codespaces style
+  if (hostname.includes("gitpod.io") || hostname.includes("preview.app.github.dev")) {
+    return `${isHttps ? "wss" : "ws"}://8000-${hostname}/ws`;
+  }
+
+  return `ws://${hostname}:8000/ws`;
+}
+
+export function useWebSocket(url?: string) {
+  const resolvedUrl = url ?? resolveWsUrl();
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
   const [messages, setMessages] = useState<WSMessage[]>([]);
   const wsRef = useRef<WebSocket | null>(null);
@@ -28,7 +52,7 @@ export function useWebSocket(url: string = "ws://localhost:8000/ws") {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     setConnectionStatus("connecting");
-    const ws = new WebSocket(url);
+    const ws = new WebSocket(resolvedUrl);
 
     ws.onopen = () => {
       setConnectionStatus("connected");
@@ -58,7 +82,7 @@ export function useWebSocket(url: string = "ws://localhost:8000/ws") {
     };
 
     wsRef.current = ws;
-  }, [url]);
+  }, [resolvedUrl]);
 
   useEffect(() => {
     connect();
