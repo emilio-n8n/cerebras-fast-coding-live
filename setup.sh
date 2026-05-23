@@ -22,21 +22,24 @@ cleanup() { kill 0 2>/dev/null; exit 0; }
 trap cleanup SIGINT SIGTERM
 
 (cd "$ROOT_DIR/backend" && uvicorn main:app --reload --port 8000 --host 0.0.0.0) &
-(cd "$ROOT_DIR/frontend" && npm run dev) &
-(cd "$ROOT_DIR/target-project" && npm run dev) &
+(cd "$ROOT_DIR/frontend" && npm run dev -- --port 3001) &
+(cd "$ROOT_DIR/target-project" && npm run dev -- --port 3002) &
+
+sleep 4
+node "$ROOT_DIR/proxy.js" &
 
 sleep 2
 
 echo ""
-echo "  Backend  → http://localhost:8000  (proxy WebSocket via frontend)"
-echo "  Frontend → http://localhost:3000"
-echo "  Target   → http://localhost:3001"
+echo "  Backend  → http://localhost:8000"
+echo "  Frontend → http://localhost:3001"
+echo "  Target   → http://localhost:3002"
+echo "  Proxy    → http://localhost:3000  (à ouvrir dans Cloud Shell)"
 echo ""
 echo "Appuie sur Ctrl+C pour tout arrêter."
 
-# Ouvre les ports Cloud Shell si disponible
+# Ouvre le port proxy dans Cloud Shell
 if command -v cloudshell &>/dev/null; then
   cloudshell preview --port 3000 &>/dev/null &
-  cloudshell preview --port 8000 &>/dev/null &
 fi
 wait

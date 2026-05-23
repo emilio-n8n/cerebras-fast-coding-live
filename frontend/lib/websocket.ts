@@ -18,16 +18,9 @@ function resolveWsUrl(): string {
   const envUrl = process.env.NEXT_PUBLIC_WS_URL;
   if (envUrl) return envUrl;
 
-  const { hostname, protocol } = window.location;
-  const isHttps = protocol === "https:";
-
-  // Cloud Shell: PORT-HASH.cloudshell.dev → wss://8000-HASH.cloudshell.dev/ws
-  if (hostname.includes("cloudshell.dev") || hostname.includes("googleusercontent.com")) {
-    const rest = hostname.replace(/^\d+-/, "");
-    return `${isHttps ? "wss" : "ws"}://8000-${rest}/ws`;
-  }
-
-  return `ws://${hostname}:8000/ws`;
+  // Same-origin: proxy.js on this port forwards /ws to backend on :8000
+  const { protocol, host } = window.location;
+  return `${protocol === "https:" ? "wss" : "ws"}://${host}/ws`;
 }
 
 export function useWebSocket(url?: string) {
