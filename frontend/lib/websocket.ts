@@ -13,14 +13,21 @@ export type WSMessage =
 type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 function resolveWsUrl(): string {
-  if (typeof window === "undefined") return "ws://localhost:3000/ws";
+  if (typeof window === "undefined") return "ws://localhost:8000/ws";
 
   const envUrl = process.env.NEXT_PUBLIC_WS_URL;
   if (envUrl) return envUrl;
 
-  // Same-origin: Next.js custom server proxies /ws to backend on port 8000
-  const { protocol, host } = window.location;
-  return `${protocol === "https:" ? "wss" : "ws"}://${host}/ws`;
+  const { hostname, protocol } = window.location;
+  const isHttps = protocol === "https:";
+
+  // Cloud Shell: PORT-HASH.cloudshell.dev → wss://8000-HASH.cloudshell.dev/ws
+  if (hostname.includes("cloudshell.dev") || hostname.includes("googleusercontent.com")) {
+    const rest = hostname.replace(/^\d+-/, "");
+    return `${isHttps ? "wss" : "ws"}://8000-${rest}/ws`;
+  }
+
+  return `ws://${hostname}:8000/ws`;
 }
 
 export function useWebSocket(url?: string) {

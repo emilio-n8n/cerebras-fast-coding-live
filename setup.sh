@@ -37,5 +37,6 @@ echo "Appuie sur Ctrl+C pour tout arrêter."
 # Ouvre les ports Cloud Shell si disponible
 if command -v cloudshell &>/dev/null; then
   cloudshell preview --port 3000 &>/dev/null &
+  cloudshell preview --port 8000 &>/dev/null &
 fi
 wait
